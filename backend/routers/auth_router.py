@@ -6,20 +6,25 @@ from database.models import User
 
 from schemas.auth_schema import UserLogin
 
-from services.auth import verify_password
+from fastapi.security import OAuth2PasswordRequestForm
+
+from services.auth import (
+    verify_password,
+    create_access_token
+)
 
 router = APIRouter(tags=["Auth"])
 
 
 @router.post("/login")
 def login_user(
-    user: UserLogin,
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
 
     # Find user by email
     db_user = db.query(User).filter(
-        User.email == user.email
+        User.email == form_data.username
     ).first()
 
     if not db_user:
@@ -29,16 +34,29 @@ def login_user(
 
     # Verify password
     if not verify_password(
-        user.password,
+        form_data.password,
         db_user.password
     ):
         return {
             "message": "Incorrect password"
         }
 
-    return {
-        "message": "Login successful"
+    if not db_user.email_verified:
+        raise HTTPException(
+           status_code=403,
+           detail="Please verify your email first"
+    )
+
+    access_token = create_access_token(
+         data={
+             "sub": db_user.email
     }
+)
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+}
 
 
 

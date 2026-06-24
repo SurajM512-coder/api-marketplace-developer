@@ -24,6 +24,9 @@ from schemas.user_schema import (
 
 from services.email_service import send_verification_email
 
+from services.auth import get_current_user
+from fastapi import Depends
+
 
 @router.post("/register")
 def register_user(
@@ -76,6 +79,7 @@ def register_user(
     response_model=list[UserResponse]
 )
 def get_users(
+    current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     return db.query(User).all()

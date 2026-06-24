@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from database.db import get_db
@@ -8,7 +8,7 @@ from schemas.auth_schema import UserLogin
 
 from services.auth import verify_password
 
-router = APIRouter()
+router = APIRouter(tags=["Auth"])
 
 
 @router.post("/login")
@@ -38,4 +38,30 @@ def login_user(
 
     return {
         "message": "Login successful"
+    }
+
+
+
+@router.get("/verify-email/{token}")
+def verify_email(
+    token: str,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(
+        User.verification_token == token
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid verification token"
+        )
+
+    user.email_verified = True
+    user.verification_token = None
+
+    db.commit()
+
+    return {
+        "message": "Email verified successfully"
     }

@@ -10,6 +10,8 @@ from database.models import User
 
 from services.auth import hash_password
 
+import secrets
+
 from schemas.user_schema import (
 
     UserRegister,
@@ -19,6 +21,8 @@ from schemas.user_schema import (
     UserUpdate
 
 )
+
+from services.email_service import send_verification_email
 
 
 @router.post("/register")
@@ -39,11 +43,15 @@ def register_user(
         detail="Email already registered"
     )
 
+    token = secrets.token_urlsafe(32)
+
     # Create new user
     new_user = User(
         name=user.name,
         email=user.email,
-        password=hash_password(user.password)
+        password=hash_password(user.password),
+        email_verified=False,
+        verification_token=token
     )
 
     db.add(new_user)
@@ -51,6 +59,11 @@ def register_user(
     db.commit()
 
     db.refresh(new_user)
+    
+    send_verification_email(
+        new_user.email,
+        new_user.verification_token
+)
 
     return {
         "message": "User registered"
@@ -60,19 +73,12 @@ def register_user(
 
 @router.get(
     "/users",
-
     response_model=list[UserResponse]
 )
-
 def get_users(
-
     db: Session = Depends(get_db)
-
 ):
-
-    users = db.query(User).all()
-
-    return users
+    return db.query(User).all()
 
 
 
@@ -104,67 +110,52 @@ def get_user(
     "/users/{id}",
     response_model=UserResponse
 )
-
 def update_user(
-
     id: int,
-
     updated_user: UserUpdate,
-
     db: Session = Depends(get_db)
-
 ):
 
     user = db.query(User).filter(
-
         User.id == id
-
     ).first()
-
 
     if not user:
-
         raise HTTPException(
-
             status_code=404,
-
             detail="User not found"
-
         )
 
-    existing_user = db.query(User).filter(
+    # Check if another user already uses this email
+    if updated_user.email is not None:
 
-    User.email == updated_user.email,
+        existing_user = db.query(User).filter(
+            User.email == updated_user.email,
+            User.id != id
+        ).first()
 
-    User.id != id
+        if existing_user:
+            raise HTTPException(
+                status_code=400,
+                detail="Email already registered"
+            )
 
-    ).first()
+        user.email = updated_user.email
 
+    # Update only provided fields
+    if updated_user.name is not None:
+        user.name = updated_user.name
 
-    if existing_user:
+    if updated_user.password is not None:
+        user.password = hash_password(
+            updated_user.password
+        )
 
-     raise HTTPException(
-
-        status_code=400,
-
-        detail="Email already registered"
-
-    )
-
-
-    user.name = updated_user.name
-
-    user.email = updated_user.email
-
-    user.password = hash_password(
-        updated_user.password
-    )
-
+    if updated_user.role is not None:
+        user.role = updated_user.role
 
     db.commit()
-
     db.refresh(user)
-
 
     return user
 

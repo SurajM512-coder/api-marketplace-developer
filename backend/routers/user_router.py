@@ -24,7 +24,11 @@ from schemas.user_schema import (
 
 from services.email_service import send_verification_email
 
-from services.auth import get_current_user
+from services.auth import (
+    get_current_user,
+    require_developer,
+    require_admin
+)
 from fastapi import Depends
 
 
@@ -202,4 +206,24 @@ def delete_user(
 
         "message": "User deleted successfully"
 
+    }
+
+
+
+@router.get("/developer-test")
+def developer_test(
+    current_user = Depends(require_developer)
+):
+    return {
+        "message": f"Welcome Developer {current_user.name}"
+    }
+
+
+
+@router.get("/admin-test")
+def admin_test(
+    current_user: User = Depends(require_admin)
+):
+    return {
+        "message": f"Welcome Admin {current_user.name}"
     }

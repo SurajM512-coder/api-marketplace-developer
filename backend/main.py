@@ -6,9 +6,16 @@ from database.models import User, Base
 
 from routers.auth_router import router as auth_router
 
+from starlette.middleware.sessions import SessionMiddleware
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="api_marketplace_google_oauth_secret"
+)
 
 app.include_router(user_router)
 app.include_router(auth_router)

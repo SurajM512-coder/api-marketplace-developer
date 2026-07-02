@@ -13,6 +13,14 @@ from services.auth import (
     create_access_token
 )
 
+from fastapi import Request
+from fastapi.responses import RedirectResponse
+
+from services.google_auth import oauth
+
+from database.db import SessionLocal
+from schemas.user_schema import UserRole
+
 router = APIRouter(tags=["Auth"])
 
 
@@ -83,3 +91,59 @@ def verify_email(
     return {
         "message": "Email verified successfully"
     }
+
+
+
+@router.get("/auth/google/login")
+async def google_login(request: Request):
+
+    redirect_uri = request.url_for("google_callback")
+
+    print("Redirect URI:", redirect_uri)
+
+    return await oauth.google.authorize_redirect(
+        request,
+        redirect_uri
+    )
+
+
+
+@router.get("/auth/google/callback")
+async def google_callback(request: Request):
+
+    token = await oauth.google.authorize_access_token(request)
+    user_info = token["userinfo"]
+
+    email = user_info["email"]
+    name = user_info["name"]
+
+    db = SessionLocal()
+
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        user = User(
+            name=name,
+            email=email,
+            role=UserRole.consumer,
+            email_verified=True
+        )
+
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    access_token = create_access_token(
+        data={"sub": user.email}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "name": user.name,
+            "email": user.email,
+            "role": user.role.value
+        }
+    }
+

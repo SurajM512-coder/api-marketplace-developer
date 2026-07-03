@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey
 
 from datetime import datetime
 
@@ -7,6 +7,8 @@ from database.db import Base
 from sqlalchemy import Enum as SQLEnum
 
 from schemas.user_schema import UserRole
+
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
@@ -51,4 +53,46 @@ class User(Base):
         DateTime,
         default=datetime.utcnow,
         onupdate=datetime.utcnow
+    )
+
+
+
+
+class API(Base):
+    __tablename__ = "apis"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String, nullable=False)
+
+    description = Column(Text, nullable=False)
+
+    base_url = Column(String, nullable=False)
+
+    category = Column(String, nullable=False)
+
+    version = Column(String, default="1.0.0")
+
+    pricing = Column(String, default="Free")
+
+    developer_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    developer = relationship(
+        "User",
+        backref="apis"
     )

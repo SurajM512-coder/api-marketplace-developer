@@ -52,10 +52,57 @@ def create_api(
     response_model=list[APIResponse]
 )
 def get_all_apis(
+    search: str | None = None,
+    category: str | None = None,
+    pricing: str | None = None,
+    sort_by: str | None = "newest",
+    page: int = 1,
+    limit: int = 10,
     db: Session = Depends(get_db)
 ):
 
-    apis = db.query(API).all()
+    query = db.query(API)
+
+
+    if search:
+        query = query.filter(
+            API.name.ilike(f"%{search}%")
+        )
+
+
+    if category:
+        query = query.filter(
+            API.category == category
+        )
+
+
+    if pricing:
+        query = query.filter(
+            API.pricing == pricing
+        )
+
+
+    if sort_by == "newest":
+        query = query.order_by(
+            API.created_at.desc()
+        )
+
+
+    elif sort_by == "oldest":
+        query = query.order_by(
+            API.created_at.asc()
+        )
+
+
+    offset = (page - 1) * limit
+
+
+    apis = query.offset(
+        offset
+    ).limit(
+        limit
+    ).all()
+
 
     return apis
 
@@ -169,3 +216,22 @@ def delete_api(
     return {
         "message": "API deleted successfully"
     }
+
+
+
+
+@router.get(
+    "/my-apis",
+    response_model=list[APIResponse]
+)
+def get_my_apis(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_developer)
+):
+
+    apis = db.query(API).filter(
+        API.developer_id == current_user.id
+    ).all()
+
+
+    return apis

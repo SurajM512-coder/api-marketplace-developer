@@ -96,3 +96,55 @@ class API(Base):
         "User",
         backref="apis"
     )
+
+
+
+
+class APIKey(Base):
+    __tablename__ = "api_keys"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    key = Column(
+        String,
+        unique=True,
+        nullable=False
+    )
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    api_id = Column(
+        Integer,
+        ForeignKey("apis.id"),
+        nullable=False
+    )
+
+    is_active = Column(
+        Boolean,
+        default=True
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+
+    user = relationship(
+        "User",
+        backref="api_keys"
+    )
+
+
+    api = relationship(
+        "API",
+        backref="api_keys"
+    )

@@ -10,6 +10,8 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from routers import api_router
 
+from routers import api_key_router
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -22,6 +24,7 @@ app.add_middleware(
 app.include_router(user_router)
 app.include_router(auth_router)
 app.include_router(api_router.router)
+app.include_router(api_key_router.router)
 
 @app.get("/")
 def home():

@@ -12,6 +12,8 @@ from routers import api_router
 
 from routers import api_key_router
 
+from routers import subscription_router
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -25,6 +27,7 @@ app.include_router(user_router)
 app.include_router(auth_router)
 app.include_router(api_router.router)
 app.include_router(api_key_router.router)
+app.include_router(subscription_router.router)
 
 @app.get("/")
 def home():

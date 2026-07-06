@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import secrets
 
 from database.db import get_db
-from database.models import API, APIKey, User
+from database.models import API, APIKey, Subscription, User
 
 from schemas.api_key_schema import APIKeyResponse
 
@@ -38,6 +38,20 @@ def generate_api_key(
             status_code=404,
             detail="API not found"
         )
+
+    
+    subscription = db.query(Subscription).filter(
+       Subscription.user_id == current_user.id,
+       Subscription.api_id == api.id,
+       Subscription.is_active == True
+    ).first()
+
+
+    if not subscription:
+       raise HTTPException(
+         status_code=403,
+         detail="You must subscribe before generating an API key"
+    )
 
 
     generated_key = secrets.token_urlsafe(32)

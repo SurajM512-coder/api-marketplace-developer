@@ -148,3 +148,55 @@ class APIKey(Base):
         "API",
         backref="api_keys"
     )
+
+
+
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+
+    api_id = Column(
+        Integer,
+        ForeignKey("apis.id"),
+        nullable=False
+    )
+
+
+    is_active = Column(
+        Boolean,
+        default=True
+    )
+
+
+    subscribed_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+
+    user = relationship(
+        "User",
+        backref="subscriptions"
+    )
+
+
+    api = relationship(
+        "API",
+        backref="subscriptions"
+    )

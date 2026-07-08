@@ -12,6 +12,10 @@ from services.auth import get_current_user_data
 
 from services.api_key_service import validate_api_key
 
+from fastapi import Request
+
+from services.usage_service import log_api_usage
+
 
 router = APIRouter(
     tags=["API Keys"]
@@ -139,8 +143,21 @@ def revoke_api_key(
     "/test-api-access"
 )
 def test_api_access(
-    api_key = Depends(validate_api_key)
+    request: Request,
+    api_key = Depends(validate_api_key),
+    db: Session = Depends(get_db)
 ):
+
+
+    log_api_usage(
+        db=db,
+        api_id=api_key.api_id,
+        user_id=api_key.user_id,
+        api_key_id=api_key.id,
+        endpoint=str(request.url.path),
+        method=request.method
+    )
+
 
     return {
         "message": "API access granted",

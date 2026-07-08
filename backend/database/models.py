@@ -200,3 +200,73 @@ class Subscription(Base):
         "API",
         backref="subscriptions"
     )
+
+
+
+
+class APIUsage(Base):
+    __tablename__ = "api_usage"
+
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+
+    api_id = Column(
+        Integer,
+        ForeignKey("apis.id"),
+        nullable=False
+    )
+
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+
+    api_key_id = Column(
+        Integer,
+        ForeignKey("api_keys.id"),
+        nullable=False
+    )
+
+
+    endpoint = Column(
+        String,
+        nullable=False
+    )
+
+
+    method = Column(
+        String,
+        nullable=False
+    )
+
+
+    timestamp = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+
+    api = relationship(
+        "API",
+        backref="usage_logs"
+    )
+
+
+    user = relationship(
+        "User",
+        backref="usage_logs"
+    )
+
+
+    api_key = relationship(
+        "APIKey",
+        backref="usage_logs"
+    )

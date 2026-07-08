@@ -18,6 +18,8 @@ from routers import usage_router
 
 from routers import admin_router
 
+from routers import review_router
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -34,6 +36,7 @@ app.include_router(api_key_router.router)
 app.include_router(subscription_router.router)
 app.include_router(usage_router.router)
 app.include_router(admin_router.router)
+app.include_router(review_router.router)
 
 @app.get("/")
 def home():

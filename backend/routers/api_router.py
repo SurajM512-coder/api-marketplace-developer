@@ -2,7 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from database.db import get_db
-from database.models import API, User
+from database.models import (
+    API,
+    User,
+    APIUsage,
+    Review
+)
 
 from schemas.api_schema import (
     APICreate,
@@ -11,6 +16,8 @@ from schemas.api_schema import (
 )
 
 from services.auth import require_developer
+
+from sqlalchemy import func
 
 
 router = APIRouter(
@@ -235,3 +242,134 @@ def get_my_apis(
 
 
     return apis
+
+
+
+
+@router.get(
+    "/apis/discovery/popular"
+)
+def popular_apis(
+    db: Session = Depends(get_db)
+):
+
+
+    results = (
+        db.query(
+            API.id,
+            API.name,
+            API.category,
+            func.count(APIUsage.id).label(
+                "total_requests"
+            )
+        )
+        .join(
+            APIUsage,
+            API.id == APIUsage.api_id
+        )
+        .group_by(
+            API.id
+        )
+        .order_by(
+            func.count(APIUsage.id).desc()
+        )
+        .limit(10)
+        .all()
+    )
+
+
+    return [
+        {
+            "api_id": item.id,
+            "name": item.name,
+            "category": item.category,
+            "total_requests": item.total_requests
+        }
+        for item in results
+    ]
+
+
+
+
+@router.get(
+    "/apis/discovery/top-rated"
+)
+def top_rated_apis(
+    db: Session = Depends(get_db)
+):
+
+
+    results = (
+        db.query(
+            API.id,
+            API.name,
+            API.category,
+            func.avg(Review.rating).label(
+                "average_rating"
+            ),
+            func.count(Review.id).label(
+                "total_reviews"
+            )
+        )
+        .join(
+            Review,
+            API.id == Review.api_id
+        )
+        .group_by(
+            API.id
+        )
+        .order_by(
+            func.avg(Review.rating).desc()
+        )
+        .limit(10)
+        .all()
+    )
+
+
+    return [
+        {
+            "api_id": item.id,
+            "name": item.name,
+            "category": item.category,
+            "average_rating": round(
+                item.average_rating,
+                2
+            ),
+            "total_reviews": item.total_reviews
+        }
+
+        for item in results
+    ]
+
+
+
+
+@router.get(
+    "/apis/discovery/recent"
+)
+def recent_apis(
+    db: Session = Depends(get_db)
+):
+
+
+    apis = (
+        db.query(API)
+        .order_by(
+            API.created_at.desc()
+        )
+        .limit(10)
+        .all()
+    )
+
+
+    return [
+        {
+            "api_id": api.id,
+            "name": api.name,
+            "category": api.category,
+            "pricing": api.pricing,
+            "created_at": api.created_at
+        }
+
+        for api in apis
+    ]

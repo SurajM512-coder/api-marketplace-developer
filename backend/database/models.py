@@ -55,6 +55,11 @@ class User(Base):
         onupdate=datetime.utcnow
     )
 
+    is_active = Column(
+        Boolean,
+        default=True
+    )
+
 
 
 
@@ -95,6 +100,11 @@ class API(Base):
     developer = relationship(
         "User",
         backref="apis"
+    )
+
+    status = Column(
+       String,
+       default="pending"
     )
 
 

@@ -18,7 +18,9 @@ from schemas.user_schema import (
 
     UserResponse,
 
-    UserUpdate
+    UserUpdate,
+
+    UserRole
 
 )
 
@@ -49,6 +51,12 @@ def register_user(
         status_code=400,
         detail="Email already registered"
     )
+    
+    if user.role == UserRole.admin:
+      raise HTTPException(
+          status_code=403,
+          detail="Admin accounts cannot be created through public registration"
+        )
 
     token = secrets.token_urlsafe(32)
 

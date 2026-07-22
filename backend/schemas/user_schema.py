@@ -17,6 +17,7 @@ class UserRegister(BaseModel):
     name: str
     email: EmailStr
     password: str
+    role: UserRole = UserRole.consumer
 
     @field_validator("password")
     @classmethod

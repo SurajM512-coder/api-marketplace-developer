@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-
-DATABASE_URL = "postgresql://suraj:Suraj12345678*@localhost:5432/api_marketplace"
+from config import DATABASE_URL
 
 engine = create_engine(DATABASE_URL)
 

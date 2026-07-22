@@ -1,20 +1,11 @@
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta    
-from dotenv import load_dotenv
-import os
+from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from database.db import SessionLocal
 from database.models import User
-
-load_dotenv()
-
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(
-    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
-)
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],

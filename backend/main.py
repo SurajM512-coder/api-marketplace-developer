@@ -22,9 +22,45 @@ from routers import review_router
 
 from routers import dashboard_router
 
+from fastapi.middleware.cors import CORSMiddleware
+
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException
+
+from utils.exception_handler import (
+    http_exception_handler,
+    validation_exception_handler
+)
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ],
+
+    allow_credentials=True,
+
+    allow_methods=["*"],
+
+    allow_headers=["*"],
+)
+
+app.add_exception_handler(
+    HTTPException,
+    http_exception_handler
+)
+
+
+app.add_exception_handler(
+    RequestValidationError,
+    validation_exception_handler
+)
 
 app.add_middleware(
     SessionMiddleware,

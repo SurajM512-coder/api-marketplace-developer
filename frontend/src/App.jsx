@@ -11,6 +11,7 @@ import ApiDetails from "./pages/ApiDetails";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import OAuthSuccess from "./pages/OAuthSuccess";
 
 function App() {
   return (
@@ -24,6 +25,8 @@ function App() {
           <Route path="/login" element={<Login />} />
 
           <Route path="/register" element={<Register />} />
+
+          <Route path="/oauth-success" element={<OAuthSuccess />} />
 
           <Route path="/apis" element={<BrowseApis />} />
 

@@ -71,6 +71,20 @@ function Login() {
           Login
         </button>
       </form>
+
+      <hr />
+
+      <p>Or</p>
+
+      <button
+        type="button"
+        onClick={() => {
+          window.location.href =
+            "http://localhost:8000/auth/google/login";
+        }}
+      >
+        Continue with Google
+      </button>
     </div>
   );
 }

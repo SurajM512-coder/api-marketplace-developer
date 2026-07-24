@@ -138,13 +138,11 @@ async def google_callback(request: Request):
         data={"sub": user.email}
     )
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": {
-            "name": user.name,
-            "email": user.email,
-            "role": user.role.value
-        }
-    }
+    return RedirectResponse(
+       url=(
+         f"http://localhost:5173/oauth-success"
+           f"?token={access_token}"
+           f"&role={user.role.value}"
+        )
+    )
 

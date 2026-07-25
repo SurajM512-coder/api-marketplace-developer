@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
+import { subscribeToApi } from "../services/api";
 
 function ApiDetails() {
   const { id } = useParams();
@@ -42,6 +43,21 @@ function ApiDetails() {
     );
   }
 
+  const handleSubscribe = async () => {
+    try {
+      await subscribeToApi(id);
+      alert("Subscribed successfully!");
+    } catch (error) {
+      console.error(error.response);
+
+      alert(
+        error.response?.data?.detail ||
+        error.message ||
+        "Subscription failed."
+      );
+    }
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -81,9 +97,7 @@ function ApiDetails() {
 
       <button
         style={styles.button}
-        onClick={() => {
-          alert("Subscription feature coming soon!");
-        }}
+        onClick={handleSubscribe}
       >
         Subscribe
       </button>

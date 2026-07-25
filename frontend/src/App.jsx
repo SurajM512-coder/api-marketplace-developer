@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import OAuthSuccess from "./pages/OAuthSuccess";
+import MySubscriptions from "./pages/MySubscriptions";
 
 function App() {
   return (
@@ -37,6 +38,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/my-subscriptions"
+            element={
+              <ProtectedRoute>
+                <MySubscriptions />
               </ProtectedRoute>
             }
           />

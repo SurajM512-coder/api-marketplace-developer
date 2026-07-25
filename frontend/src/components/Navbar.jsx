@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
-  const { token, logout } = useAuth();
+  const { token, role, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -44,6 +44,12 @@ function Navbar() {
             <Link to="/dashboard" style={linkStyle}>
               Dashboard
             </Link>
+
+            {role === "consumer" && (
+              <Link to="/my-subscriptions" style={linkStyle}>
+                My Subscriptions
+              </Link>
+            )}
 
             <button
               onClick={handleLogout}
